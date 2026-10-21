@@ -34,6 +34,10 @@ A five-case offline unittest suite covers draft creation, duplicate IDs, invalid
 
 Run: `python3 -m unittest discover -s tests -v`.
 
+## Provider interface (prototype)
+
+The `adapters.py` module defines a local contract for invoice rendering, unsent email draft creation, and ledger events. It contains no live Canva/Gmail/Notion API calls. Tests in `tests/test_adapters.py` cover confirmation gates and pre-provider validation. See [integration contract](docs/INTEGRATION_CONTRACT.md) for production security requirements.
+
 ## Next
 
 Public plugin submission needs validation and OpenAI review. Connected use by unrelated users requires secure OAuth, tenant isolation, audited send approval and integrated PDF export. Consult https://developers.openai.com/plugins/deploy/submission.
