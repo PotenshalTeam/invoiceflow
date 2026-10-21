@@ -1,0 +1,9 @@
+{
+  "name": "InvoiceFlow",
+  "plugins": [
+    {
+      "name": "invoiceflow",
+      "source": "./plugins/invoiceflow"
+    }
+  ]
+}
