@@ -38,6 +38,18 @@ Run: `python3 -m unittest discover -s tests -v`.
 
 The `adapters.py` module defines a local contract for invoice rendering, unsent email draft creation, and ledger events. It contains no live Canva/Gmail/Notion API calls. Tests in `tests/test_adapters.py` cover confirmation gates and pre-provider validation. See [integration contract](docs/INTEGRATION_CONTRACT.md) for production security requirements.
 
+## Local inspection API (development only)
+
+Start a loopback-only diagnostic server:
+
+```bash
+python3 plugins/invoiceflow/skills/invoice-workflow/scripts/local_api.py
+curl http://127.0.0.1:8765/healthz
+curl http://127.0.0.1:8765/version
+```
+
+It only exposes health and version. Invoice/customer endpoints and HTTP mutations are deliberately disabled. It is **not** a public-hosted API, MCP endpoint or SaaS. Never bind the local inspection server to 0.0.0.0. Tests are in `tests/test_local_api.py`.
+
 ## Next
 
 Public plugin submission needs validation and OpenAI review. Connected use by unrelated users requires secure OAuth, tenant isolation, audited send approval and integrated PDF export. Consult https://developers.openai.com/plugins/deploy/submission.
