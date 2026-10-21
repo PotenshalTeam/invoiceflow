@@ -28,6 +28,12 @@ The local engine generates HTML and unsent .eml; it does not send email or claim
 - `plugins/invoiceflow/skills/invoice-workflow/scripts/invoiceflow.py`: local demo
 - `.agents/plugins/marketplace.json`: repository marketplace metadata
 
+## Verification
+
+A five-case offline unittest suite covers draft creation, duplicate IDs, invalid amounts, PAID copy preservation and duplicate payment protection. The suite is in `tests/test_invoiceflow.py`. These tests exercise the standalone engine, not hosted Canva/Gmail/Notion integrations.
+
+Run: `python3 -m unittest discover -s tests -v`.
+
 ## Next
 
 Public plugin submission needs validation and OpenAI review. Connected use by unrelated users requires secure OAuth, tenant isolation, audited send approval and integrated PDF export. Consult https://developers.openai.com/plugins/deploy/submission.
