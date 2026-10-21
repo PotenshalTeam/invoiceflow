@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Offline draft-first InvoiceFlow demo; no mail is sent."""
-import argparse, datetime as dt, json, sqlite3
-from decimal import Decimal
+import argparse, datetime as dt, json, sqlite3, re
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from html import escape
 from email.message import EmailMessage
@@ -30,12 +30,15 @@ def run():
     con=sqlite3.connect(a.db);con.row_factory=sqlite3.Row
     con.execute(SCHEMA);con.commit()
     out=Path(a.out);out.mkdir(parents=True,exist_ok=True)
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", a.id if hasattr(a,"id") else "LIST") or (hasattr(a,"id") and ".." in a.id): raise ValueError("Unsafe invoice ID")
     if a.command=="create":
+        if "\\n" in a.email or "\\r" in a.email or "@" not in a.email: raise ValueError("Invalid email")
+        if not re.fullmatch(r"[A-Z]{3}",a.currency.upper()): raise ValueError("Invalid currency")
         cents=Decimal(a.amount)*100
-        if cents != cents.to_integral_value() or cents<=0:raise ValueError("Invalid amount")
+        if not cents.is_finite() or cents != cents.to_integral_value() or cents<=0:raise ValueError("Invalid amount")
         issue=dt.date.fromisoformat(a.issue_date)
         dt.date.fromisoformat(a.service_date)
-        if a.terms_days<0:raise ValueError("Negative terms")
+        if not 0 <= a.terms_days <= 365:raise ValueError("Invalid payment terms")
         due=issue+dt.timedelta(days=a.terms_days)
         con.execute("INSERT INTO invoices VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
           (a.id,a.customer,a.email,a.service,a.service_date,str(issue),str(due),int(cents),a.currency,"DRAFT",None,None))
@@ -45,6 +48,7 @@ def run():
         row=con.execute("SELECT status FROM invoices WHERE id=?",(a.id,)).fetchone()
         if not row:raise ValueError("Invoice not found")
         if row["status"]=="PAID":raise ValueError("Payment already recorded")
+        if not a.method.strip():raise ValueError("Payment method required")
         con.execute("UPDATE invoices SET status='PAID',paid_date=?,payment_method=? WHERE id=?",(a.date,a.method,a.id));con.commit()
     if a.command in ("show","create","confirm-payment"):
         row=con.execute("SELECT * FROM invoices WHERE id=?",(a.id,)).fetchone()
@@ -68,7 +72,7 @@ def run():
             msg["To"]=row["email"];msg["Subject"]=f'Invoice {row["id"]}'
             msg.set_content(f'Hello {row["customer"]},\n\nPlease find invoice {row["id"]} for {row["service"]}.\nTotal: {amount}\nDue: {row["due_date"]}\n\nAttach {invoice.name} before sending.')
             (out/(a.id+"-UNSENT.eml")).write_bytes(msg.as_bytes())
-        print(json.dumps({"status":row["status"],"invoice":str(invoice)}))
+        print(json.dumps({"status":row["status"],"invoice":str(invoice),"sent":False}))
     else:
         print(json.dumps([dict(r) for r in con.execute("SELECT * FROM invoices")],indent=2))
 if __name__=="__main__":run()
