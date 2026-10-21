@@ -1,0 +1,4 @@
+interface:
+  display_name: "InvoiceFlow"
+  short_description: "Draft-first invoice workflows"
+  brand_color: "#1D3557"
