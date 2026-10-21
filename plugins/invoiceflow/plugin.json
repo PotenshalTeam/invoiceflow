@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "invoiceflow",
+  "version": "0.1.0",
+  "description": "Draft-first invoicing skill. Prepares invoice documents, unsent email drafts, and PAID copies following confirmed payments.",
+  "author": {
+    "name": "PotenshalTeam"
+  },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "InvoiceFlow",
+        "shortDescription": "Draft-first invoice workflow",
+        "longDescription": "Assist businesses with invoices, drafts and payment confirmation. Standalone starter; no hosted Canva, Gmail or Notion integration.",
+        "developerName": "PotenshalTeam",
+        "category": "Productivity"
+      }
+    }
+  }
+}
